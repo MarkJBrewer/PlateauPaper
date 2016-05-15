@@ -4,3 +4,324 @@ author: "Mark Brewer"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: pdf_document
 ---
+
+## R code in support of the paper
+## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (). Climate envelopes for species distribution models. Methods in Ecology and Evolution [Hopefully].
+
+This code will reproduce the examples and figures from the paper, and hopefully help in understanding the related R package "plateau", also available on GitHub, as the following code suggests:
+
+```{r Install.plateau, echo=TRUE}
+# Install the plateau package from GitHub - need devtools for this
+library(devtools)
+install_github("MarkJBrewer/plateau")
+library(plateau)
+```
+
+## Figure 1
+
+```{r Figure 1, echo=FALSE}
+# Figure 1 - Example 1D envelope
+op <- par()
+par(mfrow = c(1,2), mar = c(3.2,3,0.5,1), mgp = c(2,1,0))
+plot(0,0,xlim=c(-10,10),ylim=c(-10,10),type="n",
+    xlab="",ylab="",
+    yaxt="n",xaxt="n")
+mtext("Linear Predictor",side=2,line=1,cex=1.1)
+mtext("Climate Covariate",side=1,line=1,cex=1.1)
+mtext(expression(beta[0]),side=2,line=0,cex=1.2)
+lines(c(-10,-3),c(-10,0))
+lines(c(-3,1),c(0,0))
+lines(c(1,10),c(0,-10))
+text(8,7,"(a)")
+text(-8.4,-4,expression(paste(alpha[1],"+",beta[1],x)))
+text(7.7,-4,expression(paste(alpha[2],"+",beta[2],x)))
+text(1.5,2.7,expression(paste("(",a[x],",",a[z],")")))
+abline(h=0,lty=3)
+lines(c(-3,4),c(0,10),lty=2)
+lines(c(1,-8),c(0,10),lty=2)
+plot(0,0,xlim=c(-10,10),ylim=c(0,1),type="n",
+    xlab="",ylab="",yaxt="n",xaxt="n")
+mtext("Climate Covariate",side=1,line=1,cex=1.1)
+mtext("Response (Probability)",side=2,line=1,cex=1.1)
+lines(c(-3,1),0.8*c(1,1))
+xplot <- seq(-10,-3,length=1000)
+lines(xplot,0.8*21/(1+exp(-xplot)))
+xplot <- seq(1,10,length=1000)
+lines(xplot,0.8*3.7/(1+exp(xplot)))
+text(8,0.85,"(b)")
+par(op)
+```
+
+## Figure 2
+
+```{r Figure 2, echo=FALSE}
+# Figure 2 - Example bivariate envelope, at different stages of evolution
+env.calc <- function(beta1.par,beta2.par,az,ax,beta0,gamma.par,N){
+    x <- seq(-2,2,length=N)
+    x.clim <- cbind(x,x)
+    x.clim.C <- array(NA,dim=c(N,2))
+    x.beta <- array(NA,dim=c(N,2,2))
+    calc1 <- array(NA,dim=c(N,2))
+    calc2 <- array(NA,dim=c(N,2))
+    calcTotal.tmp <- array(NA,dim=c(N,N))
+    calcTotal <- array(NA,dim=c(N,N))
+    for(i in 1:N) {
+        for(e in 1:2) {
+            x.clim.C[i,e] <- x.clim[i,e]-ax[e]
+            x.beta[i,e,1] <- -beta1.par[e]*x.clim.C[i,e]
+            x.beta[i,e,2] <- beta2.par[e]*x.clim.C[i,e]
+            calc1[i,e] <- max(x.beta[i,e,1],x.beta[i,e,2])
+            calc2[i,e] <- calc1[i,e]*abs(x.clim.C[i,e])
+        }
+    }
+    for(i1 in 1:N) {
+        for(i2 in 1:N) {
+            calcTotal.tmp[i1,i2] <- az - sqrt(calc2[i1,1] + calc2[i2,2] + gamma.par*x.clim.C[i1,1]*x.clim.C[i2,2])
+            calcTotal[i1,i2] <- min(calcTotal.tmp[i1,i2],beta0)
+        }
+    }
+    env <- list(calcTotal=calcTotal,x=x,maxcalc=max(calcTotal.tmp))
+    return(env)
+}
+op <- par()
+par(mfrow=c(5,2),mar=c(0.5,0.5,0.5,0.5))
+N1 <- 20  # for persp
+N2 <- 400 # for contour
+# Cone development - standard cone
+beta1.par <- c(10,10)
+beta2.par <- c(10,10)
+az <- 0
+ax <- c(0,0)
+beta0 <- 1
+gamma.par <- 0
+env <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N1)
+persp(env$x,env$x,env$calcTotal, phi=30, theta=-40, border = 1,
+    zlab="",xlab="",ylab="",axes=FALSE,d=2)
+text(-0.5,-0.5,"(a)")
+calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
+contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
+# Now stretch in one direction
+beta1.par <- c(6,10)
+beta2.par <- c(6,10)
+env <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N1)
+persp(env$x,env$x,env$calcTotal, phi=30, theta=-40, border = 1,
+    zlab="",xlab="",ylab="",axes=FALSE,d=2)
+text(-0.5,-0.5,"(b)")
+calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
+contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
+# Now allow interaction terms along diagonal
+beta1.par <- c(6,10)
+beta2.par <- c(6,10)
+gamma.par <- -5
+env <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N1)
+persp(env$x,env$x,env$calcTotal, phi=30, theta=-40, border = 1,
+    zlab="",xlab="",ylab="",axes=FALSE,d=2)
+text(-0.5,-0.5,"(c)")
+calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
+contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
+# Now allow different slopes either side of apex
+beta1.par <- c(5,10)
+beta2.par <- c(9,40)
+gamma.par <- -5
+env <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N1)
+persp(env$x,env$x,env$calcTotal, phi=30, theta=-40, border = 1,
+    zlab="",xlab="",ylab="",axes=FALSE,d=2)
+text(-0.5,-0.5,"(d)")
+calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
+contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
+# Finally, allow the top-slice
+beta1.par <- c(5,10)
+beta2.par <- c(9,40)
+gamma.par <- -5
+beta0 <- -3
+env <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N1)
+persp(env$x,env$x,env$calcTotal, phi=30, theta=-40, border = 1,
+    zlab="",xlab="",ylab="",axes=FALSE,d=2)
+text(-0.5,-0.5,"(e)")
+calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
+contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
+par(op)
+```
+## Figure 3
+
+```{r Figure 3, echo=FALSE}
+# Figure 3 - presence/absence plots of the two species studied in the paper
+# Upper plot
+par(mfrow=c(1,1))
+species <- "fagsyl"
+source("data_load.R")
+species.name <- "Fagus sylvatica" # fagsyl
+map.plot(inputs=AFEData[,species]==1,plot.type="Presence",coordinates=coords.list,
+    species.name=species.name)
+# Lower plot
+par(mfrow=c(1,1))
+species <- "quecoc"
+source("data_load.R")
+species.name <- "Quercus coccifera" # quecoc
+map.plot(inputs=AFEData[,species]==1,plot.type="Presence",coordinates=coords.list,
+    species.name=species.name)
+```
+
+## Figure 4
+```{r Figure 4, echo=FALSE}
+# Figure 4 - a four panel plot comparing GAM envelopes with our new envelopes
+species <- "fagsyl"
+source("data_load.R")
+use.var <- c("tc","tw")
+gamx1 <- AFEData[,use.var[1]]
+gamx2 <- AFEData[,use.var[2]]
+x1 <- seq(min(gamx1),max(gamx1),length=101)
+x2 <- seq(min(gamx2),max(gamx2),length=101)
+x1.plot <- rep(x1,101)
+x2.plot <- rep(x2,each=101)
+newgamdat <- data.frame(x1=x1.plot,x2=x2.plot)
+gamy <- AFEData[,species]
+gamdata <- data.frame(y=gamy,x1=gamx1,x2=gamx2)
+# Bottom left plot
+gamfit2 <- gam(y~te(x1,x2),family=binomial,data=gamdata)
+predgam2 <- predict(gamfit2,newdata=newgamdat,type="response")
+contour(x1,x2,matrix(predgam2,ncol=101),xlab=EnvLabels[use.var[1]],ylab=EnvLabels[use.var[2]])
+points(AFEData[,use.var[1]],AFEData[,use.var[2]],col=as.numeric(AFEData[,species])+1,pch=16,cex=0.7)
+title("Default k, using te()")
+# Bottom right plot
+gamfit3 <- gam(y~te(x1,x2,sp=c(0.01,0.01)),family=binomial,data=gamdata)
+predgam3 <- predict(gamfit3,newdata=newgamdat,type="response")
+contour(x1,x2,matrix(predgam3,ncol=101),xlab=EnvLabels[use.var[1]],ylab=EnvLabels[use.var[2]])
+points(AFEData[,use.var[1]],AFEData[,use.var[2]],col=as.numeric(AFEData[,species])+1,pch=16,cex=0.7)
+title("Default k, using te() with sp=0.01")
+# Top plots - need to work out the envelopes using WinBUGS
+initial.pars <- c(4,4,4,4,0.5,0.5,1,1,-4)
+fagus.glm.1 <- fit.glm.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    initial.pars.input=initial.pars)
+initial.pars <- fagus.glm.1$par
+# Note - the WinBUGS takes a few hours to run here
+fagus.bugs.1 <- fit.bugs.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    car.sigma=0.1,adj=adj,num=num,u=u,
+    u.clique.start=u.clique.start,u.clique.end=u.clique.end,
+    adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
+    clique=in.clique,clique.i=in.clique.newnum,
+    informative.priors=list(ax=TRUE),
+    initial.pars.input=initial.pars,burnin=4000,post.burnin=1000,chains=2,thin=1,
+    working.directory=NULL,WinBUGS.debug=FALSE,
+    estimate.p=FALSE,estimate.u=FALSE)
+# Top left plot
+envelope.plot(fagus.bugs.1,type="persp",x.labels=EnvLabels[use.var],len=40)
+# Top right plot
+envelope.plot(fagus.bugs.1,type="contour",x.labels=EnvLabels[use.var])
+```
+
+## Figure 5
+```{r Figure 5, echo=FALSE}
+# Figure 5 - showing 2D envelopes for different values of a third variable
+use.var <- c("dro","tc","tw")
+initial.pars <- c(4,4,4,4,4,4,0.5,0.5,0.5,1,1,4,4,4)
+fagus.glm.2 <- fit.glm.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    initial.pars.input=initial.pars)
+initial.pars <- fagus.glm.2$par
+# Note - the WinBUGS takes a few hours to run here
+fagus.bugs.2 <- fit.bugs.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    car.sigma=0.1,adj=adj,num=num,u=u,
+    u.clique.start=u.clique.start,u.clique.end=u.clique.end,
+    adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
+    clique=in.clique,clique.i=in.clique.newnum,
+    constrain.beta=matrix(c(TRUE,FALSE,FALSE,FALSE,FALSE,FALSE),ncol=2), # read down columns
+    initial.pars.input=initial.pars,burnin=4000,post.burnin=1000,chains=2,thin=1,
+    working.directory=NULL,WinBUGS.debug=FALSE,
+    estimate.p=FALSE,estimate.u=FALSE)
+# Top left plot
+envelope.plot(fagus.bugs.2,type="contour",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=-6))
+title(expression(paste("Mean Temp of Coldest Month = ",-6,degree,"C")))
+# Top right plot
+envelope.plot(fagus.bugs.2,type="persp",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=-6),len=40)
+title(expression(paste("\nMean Temp of Coldest Month = ",-6,degree,"C")),line=3)
+# Middle left plot
+envelope.plot(fagus.bugs.2,type="contour",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=-2))
+title(expression(paste("Mean Temp of Coldest Month = ",-2,degree,"C")))
+# Middle right plot
+envelope.plot(fagus.bugs.2,type="persp",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=-2),len=40)
+title(expression(paste("\nMean Temp of Coldest Month = ",-2,degree,"C")),line=3)
+# Bottom left plot
+envelope.plot(fagus.bugs.2,type="contour",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=6))
+title(expression(paste("Mean Temp of Coldest Month = ",+6,degree,"C")))
+# Bottom right plot
+envelope.plot(fagus.bugs.2,type="persp",x.labels=EnvLabels[use.var],plot.vars=c("dro","tw"),
+    close.points="plot",fix.values=c(tc=6),len=40)
+title(expression(paste("\nMean Temp of Coldest Month = ",+6,degree,"C")),line=3)
+```
+
+## Figure 6
+```{r Figure 6, echo=FALSE}
+# Figure 6 - maps of climate projections, for the two different WinBUGS model fits
+# Left plot
+use.var <- c("tc","tw")
+xc <- AFEData[,use.var]
+map.plot(inputs=fagus.bugs.1$par,x.clim.new=xc,coordinates=coords.list,
+    species.name=species.name,scenario.name="Current")
+# Right plot
+use.var <- c("dro","tc","tw")
+xc <- AFEData[,use.var]
+map.plot(inputs=fagus.bugs.2$par,x.clim.new=xc,coordinates=coords.list,
+    species.name=species.name,scenario.name="Current")
+################################################################################################################################################################
+# Figure 7 - envelopes for the second species, with the bottom plots illustrating the use of informative priors
+species <- "quecoc"
+source("data_load.R")
+use.var <- c("dro","tc")
+species.name <- "Quercus coccifera" # quecoc
+initial.pars <- c(4,4,4,4,0.5,0.5,1,1,-4)
+quercus.glm.1 <- fit.glm.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    initial.pars.input=initial.pars)
+initial.pars <- quercus.glm.1$par
+quercus.bugs.1 <- fit.bugs.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    car.sigma=0.1,adj=adj,num=num,u=u,
+    u.clique.start=u.clique.start,u.clique.end=u.clique.end,
+    adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
+    clique=in.clique,clique.i=in.clique.newnum,
+    informative.priors=list(ax=TRUE),
+    initial.pars.input=initial.pars,burnin=5000,post.burnin=1000,chains=2,thin=1,
+    working.directory=NULL,WinBUGS.debug=FALSE,
+    estimate.p=FALSE,estimate.u=FALSE)
+# Top left plot
+envelope.plot(quercus.bugs.1,type="contour",x.labels=EnvLabels[use.var],x.plot.lims=c(0,1.5))
+# Top right plot
+envelope.plot(quercus.bugs.1,type="persp",x.labels=EnvLabels[use.var],x.plot.lims=c(0,1.5),len=40)
+# The informative prior analysis - needs to use user-supplied WinBUGS code
+# Load GBIF data
+gbif <- read.csv("plateau_finaldata.csv")
+# Very rough map of locations
+with(gbif,plot(long,lat,col=1+(quecoc_pa==1),cex=0.3,pch=16))
+# Rough histogram of temperatures as locations
+with(gbif,hist(bio11[quecoc_pa==1]/10))
+# Now as kernel density
+with(gbif,plot(density(bio11[quecoc_pa==1]/10)))
+# Work out likely 2% threshold
+gbif.fit <- density(gbif$bio11[gbif$quecoc_pa==1]/10)
+gbif.sample <- rnorm(100000, sample(gbif$bio11[gbif$quecoc_pa==1]/10, size = 100000, replace = TRUE), gbif.fit$bw)
+100*mean(gbif.sample>13) # Roughly 2%
+MTCOmax <- max(AFEData$tc)
+MTCOmin <- min(AFEData$tc)
+# Do same standardisation as plateau code - mapping to [0,1]
+(13-MTCOmin)/(MTCOmax-MTCOmin)
+initial.pars <- quercus.glm.1$par
+# Run supplied code file for informative prior
+quercus.bugs.2 <- fit.bugs.env(y=AFEData[,species],x.clim=AFEData[,use.var],
+    car.sigma=0.1,adj=adj,num=num,u=u,
+    u.clique.start=u.clique.start,u.clique.end=u.clique.end,
+    adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
+    clique=in.clique,clique.i=in.clique.newnum,
+    informative.priors=list(ax=TRUE),
+    initial.pars.input=initial.pars,burnin=5000,post.burnin=1000,chains=2,thin=1,
+    working.directory=NULL,WinBUGS.debug=FALSE,
+    estimate.p=FALSE,estimate.u=FALSE,
+    WinBUGS.code="WinBUGSinform.txt",
+    no.starting.value=list("beta[2,2]"))
+# Bottom left plot
+envelope.plot(quercus.bugs.2,type="contour",x.labels=EnvLabels[use.var],x.plot.lims=c(0,1.5))
+# Bottom right plot
+envelope.plot(quercus.bugs.2,type="persp",x.labels=EnvLabels[use.var],x.plot.lims=c(0,1.5),len=40)
+```
