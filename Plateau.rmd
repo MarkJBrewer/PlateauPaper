@@ -1,0 +1,6 @@
+---
+title: "Plateau v1"
+author: "Mark Brewer"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document
+---
