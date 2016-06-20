@@ -1,27 +1,29 @@
 ---
 title: "Plateau v2"
-author: "Mark Brewer"
+author: "Mark J Brewer, Bob O'Hara, Barb Anderson and Ralf Ohlemüller"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: pdf_document
 ---
 
 ## R code in support of the paper
-## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (). Climate envelopes for species distribution models. Methods in Ecology and Evolution [In press].
+## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (2016 or 2017). Climate envelopes for species distribution models. Methods in Ecology and Evolution [In press].
 
 This code reproduces the examples and figures from the paper, and hopefully helps in understanding the related R package "plateau", also available on GitHub, as the following code suggests:
 
 ```{r Install.plateau, echo=TRUE}
 # Install the plateau package from GitHub - need devtools for this
-library(devtools)
-install_github("MarkJBrewer/plateau")
-library(plateau)
+library(devtools,quietly=TRUE)
+install_github("MarkJBrewer/plateau",quiet=TRUE)
+library(plateau,quietly=TRUE)
 ```
 
 ## Figure 1
 
-```{r Figure 1, echo=FALSE}
+The first figure just illustrates the idea of the envelope we're trying to fit; we have an increasing slope, a possible plateau and finally a decreasing slope, on the linear predictor scale (left plot). When transformed onto the probability scale, we see the increasing and decreasing lines are now curves.
+
+```{r Figure 1, echo=FALSE, fig.height=3, fig.width=5}
 # Figure 1 - Example 1D envelope
-op <- par()
+op <- par(no.readonly = TRUE)
 par(mfrow = c(1,2), mar = c(3.2,3,0.5,1), mgp = c(2,1,0))
 plot(0,0,xlim=c(-10,10),ylim=c(-10,10),type="n",
     xlab="",ylab="",
@@ -54,7 +56,9 @@ par(op)
 
 ## Figure 2
 
-```{r Figure 2, echo=FALSE}
+A single climate covariate can be handled using an envelope function such as that illustrated by Figure 1; with more than one climate covariate we need an extension to this basic form. The simplest extension - illustrated here with two covariates - is to think of the envelope as a mathematical cone, possibly with the top removed to form a plateau, and stretched and warped in the horizontal dimensions. Figure 2 shows the development of this form: we start at the top with a regular cone; then we stretch the cone along one dimension; then we add an interaction term between the covariates, allowing a "diagonal" stretch; next we allow different slopes on either side of the cone apex; and finally we allow a "top-slice" off the top of the cone, providing a plateau.
+
+```{r Figure 2, echo=FALSE, fig.height=7, fig.width=4}
 # Figure 2 - Example bivariate envelope, at different stages of evolution
 env.calc <- function(beta1.par,beta2.par,az,ax,beta0,gamma.par,N){
     x <- seq(-2,2,length=N)
@@ -83,7 +87,7 @@ env.calc <- function(beta1.par,beta2.par,az,ax,beta0,gamma.par,N){
     env <- list(calcTotal=calcTotal,x=x,maxcalc=max(calcTotal.tmp))
     return(env)
 }
-op <- par()
+op <- par(no.readonly = TRUE)
 par(mfrow=c(5,2),mar=c(0.5,0.5,0.5,0.5))
 N1 <- 20  # for persp
 N2 <- 400 # for contour
@@ -142,9 +146,12 @@ calcTotal <- env.calc(beta1.par,beta2.par,az,ax,beta0,gamma.par,N2)
 contour(env$x,env$x,env$calcTotal-env$maxcalc,xaxt="n",yaxt="n",levels=seq(-2,-12,by=-2))
 par(op)
 ```
+
 ## Figure 3
 
-```{r Figure 3, echo=FALSE}
+In the paper we study *Fagus sylvatica* and *Quercus coccifera*. Figure 3 plots the known distribution of these species in Europe. The code below runs another script to read in the data.
+
+```{r Figure 3, echo=FALSE, fig.height=5, fig.width=5}
 # Figure 3 - presence/absence plots of the two species studied in the paper
 # Upper plot
 par(mfrow=c(1,1))
@@ -163,7 +170,12 @@ map.plot(inputs=AFEData[,species]==1,plot.type="Presence",coordinates=coords.lis
 ```
 
 ## Figure 4
-```{r Figure 4, echo=FALSE}
+
+In Figure 4 we show plots contrasting envelopes in two climate covariate dimensions obtained using GAMs with an example using our proposed plateau envelopes. Note here that the WinBUGS code for fitting the plateau envelope will likely take a few hours to run.
+
+Note that the examples using the Bayesian model in WinBUGS here need a set of "cliques" in space for analysis in order to cope with the fact that Europe contains disconnected islands. The "cliques" just represent sets of connected geographical units, of the kind that are commonly associated with a intrinsic CAR model (fitted simply in WinBUGS). If you only have one set of connected units in space, you can ignore the "cliques" aspect completely, and the methods for setting up the spatial information is exactly as that found in the WinBUGS manual (within the WinBUGS software itself). On the other hand, if you do have disconnected regions in your example (as we have), you can set up the model so that each clique is a separate intrinsic CAR.
+
+```{r Figure 4, echo=FALSE, fig.height=5, fig.width=5}
 # Figure 4 - a four panel plot comparing GAM envelopes with our new envelopes
 species <- "fagsyl"
 source("data_load.R")
@@ -211,8 +223,12 @@ envelope.plot(fagus.bugs.1,type="contour",x.labels=EnvLabels[use.var])
 ```
 
 ## Figure 5
-```{r Figure 5, echo=FALSE}
+
+Our climate envelope form is not limited to two dimensions; showing the plots is trickier, of course, for more than two covariates. Figure 5 address this by fitting the model with three climate variables, showing the envelope as a function of Drought Index and Mean Temp of the Warmest Month, for given values of the third covariate, Mean Temp of the Coldest Month.
+
+```{r Figure 5, echo=FALSE, fig.height=5, fig.width=5}
 # Figure 5 - showing 2D envelopes for different values of a third variable
+species <- "fagsyl"
 use.var <- c("dro","tc","tw")
 initial.pars <- c(4,4,4,4,4,4,0.5,0.5,0.5,1,1,4,4,4)
 fagus.glm.2 <- fit.glm.env(y=AFEData[,species],x.clim=AFEData[,use.var],
@@ -256,9 +272,13 @@ title(expression(paste("\nMean Temp of Coldest Month = ",+6,degree,"C")),line=3)
 
 ## Figure 6
 
-```{r Figure 6, echo=FALSE}
+Here we just plot projections of "climate suitability" for *Fagus sylvatica* for both the two- and the three-covariate models for comparison.
+
+```{r Figure 6, echo=FALSE, fig.height=5, fig.width=5}
 # Figure 6 - maps of climate projections, for the two different WinBUGS model fits
 # Left plot
+species <- "fagsyl"
+source("data_load.R")
 use.var <- c("tc","tw")
 xc <- AFEData[,use.var]
 map.plot(inputs=fagus.bugs.1$par,x.clim.new=xc,coordinates=coords.list,
@@ -272,7 +292,9 @@ map.plot(inputs=fagus.bugs.2$par,x.clim.new=xc,coordinates=coords.list,
 
 ## Figure 7
 
-```{r Figure 7, echo=FALSE}
+Finally, Figure 7 shows the impact of using informative priors to get a much more realistic set of results when we don't have much data for one part of the envelope. In this example, as *Quercus coccifera* is found only in southern Europe we have no idea what the upper limits for the species are likely to be from the European data alone. Luckily we have some information from the GBIF data set on presences in Africa and the Middle East, so we are able to define prior distributions for the upper limits for the species.
+
+```{r Figure 7, echo=FALSE, fig.height=5, fig.width=5}
 # Figure 7 - envelopes for the second species, with the bottom plots illustrating the use of informative priors
 species <- "quecoc"
 source("data_load.R")
@@ -299,11 +321,11 @@ envelope.plot(quercus.bugs.1,type="persp",x.labels=EnvLabels[use.var],x.plot.lim
 # Load GBIF data
 gbif <- read.csv("plateau_finaldata.csv")
 # Very rough map of locations
-with(gbif,plot(long,lat,col=1+(quecoc_pa==1),cex=0.3,pch=16))
+# with(gbif,plot(long,lat,col=1+(quecoc_pa==1),cex=0.3,pch=16))
 # Rough histogram of temperatures as locations
-with(gbif,hist(bio11[quecoc_pa==1]/10))
+# with(gbif,hist(bio11[quecoc_pa==1]/10))
 # Now as kernel density
-with(gbif,plot(density(bio11[quecoc_pa==1]/10)))
+# with(gbif,plot(density(bio11[quecoc_pa==1]/10)))
 # Work out likely 2% threshold
 gbif.fit <- density(gbif$bio11[gbif$quecoc_pa==1]/10)
 gbif.sample <- rnorm(100000, sample(gbif$bio11[gbif$quecoc_pa==1]/10, size = 100000, replace = TRUE), gbif.fit$bw)
@@ -311,7 +333,7 @@ gbif.sample <- rnorm(100000, sample(gbif$bio11[gbif$quecoc_pa==1]/10, size = 100
 MTCOmax <- max(AFEData$tc)
 MTCOmin <- min(AFEData$tc)
 # Do same standardisation as plateau code - mapping to [0,1]
-(13-MTCOmin)/(MTCOmax-MTCOmin)
+# (13-MTCOmin)/(MTCOmax-MTCOmin)
 initial.pars <- quercus.glm.1$par
 # Run supplied code file for informative prior
 quercus.bugs.2 <- fit.bugs.env(y=AFEData[,species],x.clim=AFEData[,use.var],

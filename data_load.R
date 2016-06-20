@@ -1,7 +1,9 @@
 ###############################################################################################################################################
 # data_load.R
 #
-# Code to read in the data for the paper "Climate envelopes for species distribution models" by Brewer, O'Hara, Anderson and Ohlemueller.
+# Code to read in the data for the paper "Plateau: a new method for ecologically plausible
+# climate envelopes for species distribution modelling" by Brewer, O'Hara, Anderson and Ohlemueller, to appear in Methods in
+# Ecology and Evolution.
 # This file should be called by Plateau.rmd, and is not intended for use by users (it is specific to the data set used in that paper).
 ###############################################################################################################################################
 AFEData <- read.csv("Data/AFE17spp.csv")
@@ -25,7 +27,7 @@ AFEData <- AFEData[!(AFEData$afelat>70 & AFEData$afelong<0),]
 num.AFEData <- nrow(AFEData)
 AFEData.lat <- AFEData$afelat
 AFEData.long <- AFEData$afelong
-library(oce)
+library(oce,quietly = TRUE)
 # Either run the code here for Future.List.2045 or read in the .RData created
 # using the code below
 if(file.exists("Data/AFE.List.Mapping.RData")) {
