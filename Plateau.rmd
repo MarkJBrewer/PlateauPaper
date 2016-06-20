@@ -1,14 +1,14 @@
 ---
-title: "Plateau v1"
+title: "Plateau v2"
 author: "Mark Brewer"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: pdf_document
 ---
 
 ## R code in support of the paper
-## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (). Climate envelopes for species distribution models. Methods in Ecology and Evolution [Hopefully].
+## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (). Climate envelopes for species distribution models. Methods in Ecology and Evolution [In press].
 
-This code will reproduce the examples and figures from the paper, and hopefully help in understanding the related R package "plateau", also available on GitHub, as the following code suggests:
+This code reproduces the examples and figures from the paper, and hopefully helps in understanding the related R package "plateau", also available on GitHub, as the following code suggests:
 
 ```{r Install.plateau, echo=TRUE}
 # Install the plateau package from GitHub - need devtools for this
@@ -255,6 +255,7 @@ title(expression(paste("\nMean Temp of Coldest Month = ",+6,degree,"C")),line=3)
 ```
 
 ## Figure 6
+
 ```{r Figure 6, echo=FALSE}
 # Figure 6 - maps of climate projections, for the two different WinBUGS model fits
 # Left plot
@@ -267,7 +268,11 @@ use.var <- c("dro","tc","tw")
 xc <- AFEData[,use.var]
 map.plot(inputs=fagus.bugs.2$par,x.clim.new=xc,coordinates=coords.list,
     species.name=species.name,scenario.name="Current")
-################################################################################################################################################################
+```
+
+## Figure 7
+
+```{r Figure 7, echo=FALSE}
 # Figure 7 - envelopes for the second species, with the bottom plots illustrating the use of informative priors
 species <- "quecoc"
 source("data_load.R")
