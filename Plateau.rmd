@@ -214,8 +214,7 @@ fagus.bugs.1 <- fit.bugs.env(data=AFEData,y=species,x.clim=use.var,
     adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
     clique=in.clique,clique.i=in.clique.newnum,
     informative.priors=list(ax=TRUE),
-    #initial.pars.input=initial.pars,burnin=4000,post.burnin=1000,chains=2,thin=1,
-    initial.pars.input=initial.pars,burnin=40,post.burnin=10,chains=2,thin=1,
+    initial.pars.input=initial.pars,burnin=4000,post.burnin=1000,chains=2,thin=1,
     working.directory=NULL,WinBUGS.debug=FALSE,
     estimate.p=FALSE,estimate.u=FALSE)
 # Top left plot
