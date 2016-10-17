@@ -8,7 +8,7 @@
 ###############################################################################################################################################
 AFEData <- read.csv("Data/AFE17spp.csv")
 cat(paste("Read AFE data,",nrow(AFEData),"observations.\n"))
-ClimateData <- read.csv("Data/climate raw data.csv")
+ClimateData <- read.csv("Data/climaterawdata.csv")
 cat(paste("Read climate data,",nrow(ClimateData),"observations.\n"))
 ###############################################################################################################################################
 # Set names etc

@@ -156,14 +156,14 @@ In the paper we study *Fagus sylvatica* and *Quercus coccifera*. Figure 3 plots 
 # Upper plot
 par(mfrow=c(1,1))
 species <- "fagsyl"
-source("data_load.R")
+source("dataload.R")
 species.name <- "Fagus sylvatica" # fagsyl
 map.plot(inputs=AFEData[,species]==1,plot.type="Presence",coordinates=coords.list,
     species.name=species.name)
 # Lower plot
 par(mfrow=c(1,1))
 species <- "quecoc"
-source("data_load.R")
+source("dataload.R")
 species.name <- "Quercus coccifera" # quecoc
 map.plot(inputs=AFEData[,species]==1,plot.type="Presence",coordinates=coords.list,
     species.name=species.name)
@@ -178,7 +178,7 @@ Note that the examples using the Bayesian model in WinBUGS here need a set of "c
 ```{r Figure 4, echo=FALSE, fig.height=7, fig.width=7}
 # Figure 4 - a four panel plot comparing GAM envelopes with our new envelopes
 species <- "fagsyl"
-source("data_load.R")
+source("dataload.R")
 use.var <- c("tc","tw")
 par(mfrow=c(1,1))
 gamx1 <- AFEData[,use.var[1]]
@@ -281,7 +281,7 @@ Here we just plot projections of "climate suitability" for *Fagus sylvatica* for
 # Left plot
 par(mfrow=c(1,1))
 species <- "fagsyl"
-source("data_load.R")
+source("dataload.R")
 use.var <- c("tc","tw")
 xc <- AFEData[,use.var]
 map.plot(inputs=fagus.bugs.1,x.clim.new=xc,coordinates=coords.list,
@@ -301,7 +301,7 @@ Finally, Figure 7 shows the impact of using informative priors to get a much mor
 # Figure 7 - envelopes for the second species, with the bottom plots illustrating the use of informative priors
 par(mfrow=c(1,1))
 species <- "quecoc"
-source("data_load.R")
+source("dataload.R")
 use.var <- c("dro","tc")
 species.name <- "Quercus coccifera" # quecoc
 initial.pars <- c(4,4,4,4,0.5,0.5,1,1,-4)
@@ -323,7 +323,7 @@ envelope.plot(quercus.bugs.1,type="contour",x.labels=EnvLabels[use.var],x.plot.l
 envelope.plot(quercus.bugs.1,type="persp",x.labels=EnvLabels[use.var],x.plot.lims=c(0,1.5),len=40)
 # The informative prior analysis - needs to use user-supplied WinBUGS code
 # Load GBIF data
-gbif <- read.csv("plateau_finaldata.csv")
+gbif <- read.csv("plateaufinaldata.csv")
 # Very rough map of locations
 # with(gbif,plot(long,lat,col=1+(quecoc_pa==1),cex=0.3,pch=16))
 # Rough histogram of temperatures as locations
