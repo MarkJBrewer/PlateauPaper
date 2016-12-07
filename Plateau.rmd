@@ -1,12 +1,12 @@
 ---
-title: "Plateau v5"
+title: "Plateau v6"
 author: "Mark J Brewer, Bob O'Hara, Barb Anderson and Ralf Ohlemüller"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: pdf_document
 ---
 
 ## R code in support of the paper
-## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (2016 or 2017). Climate envelopes for species distribution models. Methods in Ecology and Evolution [In press].
+## Brewer M.J., O'Hara R.B., Anderson B.J. & Ohlemüller R. (2016). Climate envelopes for species distribution models. Methods in Ecology and Evolution [In press].
 
 This code reproduces the examples and figures from the paper, and hopefully helps in understanding the related R package "plateau", also available on GitHub, as the following code suggests:
 

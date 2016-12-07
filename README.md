@@ -1,5 +1,5 @@
 # PlateauPaper
-Repository for code from the "plateau" climate envelope analysis in Brewer, O'Hara, Anderson and Ohlemüller (2016 or 2017) in Methods in Ecology and Evolution
+Repository for code from the "plateau" climate envelope analysis in Brewer, O'Hara, Anderson and Ohlemüller (2016) in Methods in Ecology and Evolution
 
 The file "Plateau.rmd" requires a number of packages:
 
