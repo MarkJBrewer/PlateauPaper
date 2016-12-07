@@ -38,7 +38,7 @@ if(file.exists("Data/AFE.List.Mapping.RData")) {
         Future.List.2045[[i]] <- 1
     }
     for(i in 1:num.ClimateData){
-        Future.List.2045[[which.min(geodDist(longitude1=AFEData.long,latitude1=AFEData.lat,longitude2=ClimateData$long[i],latitude2=ClimateData$lat[i]))]] <- c(Future.List.2045[[which.min(geodDist(lon1=AFEData.long,lat1=AFEData.lat,lon2=ClimateData$long[i],lat2=ClimateData$lat[i]))]],i)
+        Future.List.2045[[which.min(geodDist(longitude1=AFEData.long,latitude1=AFEData.lat,longitude2=ClimateData$long[i],latitude2=ClimateData$lat[i]))]] <- c(Future.List.2045[[which.min(geodDist(longitude1=AFEData.long,latitude1=AFEData.lat,longitude2=ClimateData$long[i],latitude2=ClimateData$lat[i]))]],i)
     }
     # Now set up future climate data for projections:
     for(i in 1:num.AFEData){
