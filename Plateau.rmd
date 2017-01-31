@@ -1,5 +1,5 @@
 ---
-title: "Plateau v6"
+title: "Plateau v7"
 author: "Mark J Brewer, Bob O'Hara, Barb Anderson and Ralf Ohlemüller"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: pdf_document
@@ -209,7 +209,7 @@ fagus.glm.1 <- fit.glm.env(data=AFEData,y=species,x.clim=use.var,
 initial.pars <- fagus.glm.1$par
 # Note - the WinBUGS takes a few hours to run here
 fagus.bugs.1 <- fit.bugs.env(data=AFEData,y=species,x.clim=use.var,
-    car.sigma=0.1,adj=adj,num=num,u=u,
+    not.spatial=FALSE,car.sigma=0.1,adj=adj,num=num,u=u,
     u.clique.start=u.clique.start,u.clique.end=u.clique.end,
     adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
     clique=in.clique,clique.i=in.clique.newnum,
@@ -238,7 +238,7 @@ fagus.glm.2 <- fit.glm.env(data=AFEData,y=species,x.clim=use.var,
 initial.pars <- fagus.glm.2$par
 # Note - the WinBUGS takes a few hours to run here
 fagus.bugs.2 <- fit.bugs.env(data=AFEData,y=species,x.clim=use.var,
-    car.sigma=0.1,adj=adj,num=num,u=u,
+    not.spatial=FALSE,car.sigma=0.1,adj=adj,num=num,u=u,
     u.clique.start=u.clique.start,u.clique.end=u.clique.end,
     adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
     clique=in.clique,clique.i=in.clique.newnum,
@@ -309,7 +309,7 @@ quercus.glm.1 <- fit.glm.env(data=AFEData,y=species,x.clim=use.var,
     initial.pars.input=initial.pars)
 initial.pars <- quercus.glm.1$par
 quercus.bugs.1 <- fit.bugs.env(data=AFEData,y=species,x.clim=use.var,
-    car.sigma=0.1,adj=adj,num=num,u=u,
+    not.spatial=FALSE,car.sigma=0.1,adj=adj,num=num,u=u,
     u.clique.start=u.clique.start,u.clique.end=u.clique.end,
     adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
     clique=in.clique,clique.i=in.clique.newnum,
@@ -341,7 +341,7 @@ MTCOmin <- min(AFEData$tc)
 initial.pars <- quercus.glm.1$par
 # Run supplied code file for informative prior
 quercus.bugs.2 <- fit.bugs.env(data=AFEData,y=species,x.clim=use.var,
-    car.sigma=0.1,adj=adj,num=num,u=u,
+    not.spatial=FALSE,car.sigma=0.1,adj=adj,num=num,u=u,
     u.clique.start=u.clique.start,u.clique.end=u.clique.end,
     adj.clique.start=adj.clique.start,adj.clique.end=adj.clique.end,
     clique=in.clique,clique.i=in.clique.newnum,
